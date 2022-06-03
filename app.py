@@ -9,6 +9,8 @@ from flask import Flask, render_template, request, Response, flash, redirect, ur
 from flask_moment import Moment
 import logging
 from logging import Formatter, FileHandler
+
+from sqlalchemy import true
 from forms import *
 from flask_migrate import Migrate
 
@@ -160,7 +162,7 @@ def create_venue_submission():
     venue.facebook_link = request.form['facebook_link']
     venue.seeking_description = request.form['seeking_description']
 
-    if(request.form.get('seeking_venue')):
+    if(request.form.get('seeking_talent')):
       venue.seeking_talent = True
     else:
       venue.seeking_talent = False
@@ -183,6 +185,17 @@ def edit_venue(venue_id):
   form = VenueForm()
   venue = Venue.query.get(venue_id)
 
+  form.name.data = venue.name
+  form.city.data = venue.city
+  form.address.data = venue.address
+  form.phone.data = venue.phone
+  form.genres.data = venue.genres
+  form.facebook_link.data = venue.facebook_link
+  form.website_link.data = venue.website_link
+  form.image_link.data = venue.image_link
+  form.seeking_description.data = venue.seeking_description
+  form.seeking_talent.data = venue.seeking_talent
+
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
@@ -203,6 +216,9 @@ def edit_venue_submission(venue_id):
     venue.phone = request.form['phone']
     venue.genres = ','.join(request.form.getlist('genres')) 
     venue.facebook_link = request.form['facebook_link']
+    venue.website_link = request.form['website_link']
+    venue.image_link = request.form['image_link']
+
     db.session.add(venue)
     db.session.commit()
   except:
@@ -310,6 +326,18 @@ def edit_artist(artist_id):
 
   form = ArtistForm()
 
+  form.name.data = artist.name
+  form.city.data = artist.city
+  form.phone.data = artist.phone
+  form.genres.data = artist.genres
+  form.facebook_link.data = artist.facebook_link
+  form.website_link.data = artist.website_link
+  form.image_link.data = artist.image_link
+  form.seeking_description.data = artist.seeking_description
+  form.seeking_venue.data = artist.seeking_venue
+  form.start_availability.data = artist.start_availability
+  form.end_availability.data = artist.end_availability
+
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -353,6 +381,7 @@ def edit_artist_submission(artist_id):
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
   form = ArtistForm()
+
   return render_template('forms/new_artist.html', form=form)
 
 @app.route('/artists/create', methods=['POST'])
